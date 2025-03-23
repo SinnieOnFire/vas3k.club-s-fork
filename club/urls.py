@@ -20,7 +20,7 @@ from comments.views import create_comment, edit_comment, delete_comment, show_co
 from common.feature_flags import feature_switch
 from invites.views import show_invite, list_invites, activate_invite
 from landing.views import landing, docs, godmode_network_settings, godmode_digest_settings, godmode_settings, \
-    godmode_invite, godmode_generate_invite_code, godmode_sunday_posts
+    godmode_invite, godmode_generate_invite_code, godmode_sunday_posts, godmode_mass_email
 from misc.fun import badge_generator, mass_note
 from misc.views import stats, network, robots, generate_ical_invite, generate_google_invite, show_achievement
 from rooms.views import redirect_to_room_chat, list_rooms, toggle_room_subscription, toggle_room_mute
@@ -31,7 +31,6 @@ from payments.views.common import membership_expired
 from payments.api import api_gift_days
 from invites.api import api_gift_invite_link
 from payments.views.stripe import pay, done, stripe_webhook, stop_subscription
-from payments.views.camp import stripe_camp_webhook
 from payments.views.crypto import crypto, coinbase_webhook
 from posts.api import md_show_post, api_show_post, json_feed
 from posts.models.post import Post
@@ -45,6 +44,7 @@ from posts.views.posts import show_post, edit_post, upvote_post, retract_post_vo
     toggle_post_subscription, delete_post, unpublish_post, clear_post
 from bookmarks.views import bookmarks
 from search.views import search
+from tickets.views import stripe_ticket_sale_webhook
 from users.api import api_profile, api_profile_by_telegram_id
 from users.views.delete_account import request_delete_account, confirm_delete_account
 from users.views.friends import api_friend, friends
@@ -92,7 +92,7 @@ urlpatterns = [
     path("monies/membership_expired/", membership_expired, name="membership_expired"),
     path("monies/subscription/<str:subscription_id>/stop/", stop_subscription, name="stop_subscription"),
     path("monies/stripe/webhook/", stripe_webhook, name="stripe_webhook"),
-    path("monies/stripe/webhook_camp/", stripe_camp_webhook, name="stripe_camp_webhook"),
+    path("monies/stripe/webhook_tickets/", stripe_ticket_sale_webhook, name="stripe_tickets_webhook"),
     path("monies/coinbase/webhook/", coinbase_webhook, name="coinbase_webhook"),
     path("monies/gift/<int:days>/<slug:user_slug>.json", api_gift_days, name="api_gift_days"),
 
@@ -206,6 +206,7 @@ urlpatterns = [
     path("godmode/invite/", godmode_invite, name="godmode_invite"),
     path("godmode/generate_invite_code/", godmode_generate_invite_code, name="godmode_generate_invite_code"),
     path("godmode/sunday_posts/", godmode_sunday_posts, name="godmode_sunday_posts"),
+    path("godmode/mass_email/", godmode_mass_email, name="godmode_mass_email"),
     path("godmode/dev_login/", debug_dev_login, name="debug_dev_login"),
     path("godmode/random_login/", debug_random_login, name="debug_random_login"),
     path("godmode/login/<str:user_slug>/", debug_login, name="debug_login"),
