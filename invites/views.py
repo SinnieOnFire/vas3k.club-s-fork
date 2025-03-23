@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -7,7 +7,6 @@ from authn.decorators.auth import require_auth
 from authn.helpers import set_session_cookie
 from authn.models.session import Session
 from invites.models import Invite
-from payments.products import club_subscription_activator, PRODUCTS
 from users.models.user import User
 
 
@@ -15,6 +14,8 @@ from users.models.user import User
 def list_invites(request):
     return render(request, "invites/list_invites.html", {
         "invites": Invite.for_user(request.me),
+        "can_create_invite": Invite.can_create_invite(request.me),
+        "max_invites": Invite.MAX_INVITES_PER_USER,
     })
 
 
@@ -35,7 +36,7 @@ def show_invite(request, invite_code):
 
     if invite.is_expired:
         return render(request, "error.html", {
-            "title": "Этот инвайт истек 🥲",
+            "title": "Этот инвайт истёк 🥲",
             "message": "Инвайт-код никто не использовал в течение года и он протух. "
                        "По нему больше не получится зарегистрироваться."
         })
@@ -63,7 +64,7 @@ def activate_invite(request, invite_code):
 
     if invite.is_expired:
         return render(request, "error.html", {
-            "title": "Этот инвайт истек 🥲",
+            "title": "Этот инвайт истёк 🥲",
             "message": "Инвайт-код никто не использовал в течение года и он протух. "
                        "По нему больше не получится зарегистрироваться."
         })
@@ -84,15 +85,12 @@ def activate_invite(request, invite_code):
             membership_platform_type=User.MEMBERSHIP_PLATFORM_DIRECT,
             full_name=email[:email.find("@")],
             membership_started_at=now,
-            membership_expires_at=now,
+            membership_expires_at=now + timedelta(days=365),  # 1 year membership
             created_at=now,
             updated_at=now,
             moderation_status=User.MODERATION_STATUS_INTRO,
         ),
     )
-
-    # activate subscription
-    club_subscription_activator(PRODUCTS[invite.payment.product_code], invite.payment, user)
 
     # expire the invite
     invite.used_at = now

@@ -4,8 +4,6 @@ from authn.decorators.api import api
 from club.exceptions import ApiAccessDenied
 from common.api import API
 from invites.models import Invite
-from payments.models import Payment
-from payments.products import PRODUCTS
 from utils.strings import random_string
 
 
@@ -15,24 +13,16 @@ def api_gift_invite_link(request):
         user_invites = Invite.for_user(user=request.me)
         return JsonResponse({
             "invites": [invite.to_dict() for invite in user_invites],
+            "can_create_invite": Invite.can_create_invite(request.me),
+            "max_invites": Invite.MAX_INVITES_PER_USER,
         })
 
     if request.method == "POST":
-        if not request.me.is_bank:
-            raise ApiAccessDenied(message="Только юзеры с ролью 'bank' могут генерировать инвайты")
+        if not Invite.can_create_invite(request.me):
+            raise ApiAccessDenied(message="У вас уже есть максимальное количество активных инвайтов")
 
         invite = Invite.objects.create(
             user=request.me,
-            payment=Payment.create(
-                reference=API.get_str(request, "reference") or "bank-" + random_string(length=16),
-                user=request.me,
-                product=PRODUCTS["club1_invite"],
-                status=Payment.STATUS_SUCCESS,
-                data={
-                    "source": "bank",
-                    "telegram_user_id": API.get_str(request, "telegram_user_id")
-                }
-            )
         )
 
         return JsonResponse({

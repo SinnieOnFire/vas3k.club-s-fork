@@ -4,19 +4,20 @@ from uuid import uuid4
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
+from django.core.exceptions import ValidationError
 
 from utils.strings import random_string
 
 INVITE_CODE_LENGTH = 14
 INVITE_EXPIRATION_DAYS = 365
+MAX_INVITES_PER_USER = 7
 
 
 class Invite(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     code = models.CharField(max_length=32, unique=True)
-    user = models.ForeignKey("users.User",  related_name="invites", on_delete=models.CASCADE)
-    payment = models.ForeignKey("payments.Payment", related_name="invites", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.User", related_name="invites", on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
     used_at = models.DateTimeField(null=True)
@@ -52,6 +53,13 @@ class Invite(models.Model):
     @classmethod
     def for_user(cls, user):
         return cls.objects.filter(user=user).select_related("invited_user").order_by("-created_at")
+
+    @classmethod
+    def can_create_invite(cls, user):
+        if user.is_god:
+            return True
+        active_invites = cls.objects.filter(user=user, used_at__isnull=True).count()
+        return active_invites < MAX_INVITES_PER_USER
 
     def to_dict(self):
         return {

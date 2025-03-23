@@ -2,7 +2,7 @@
 {% load static %}
 <html lang="ru">
 <head>
-    <title>{% block title %}Вастрик.Клуб 🤘✖️👩‍💻‍{% endblock %}</title>
+    <title>{% block title %}Cyber Space 🦔‍{% endblock %}</title>
     {% block fonts %}
         {% include "common/fonts.html" %}
     {% endblock %}
@@ -19,10 +19,10 @@
 
     {% block feeds %}
     <link rel="alternate" type="application/rss+xml"
-          title="Вастрик.Клуб: Новые посты"
+          title="Cyber Space: Новые посты"
           href="{{ settings.APP_HOST }}{% url "rss" %}" />
 
-    <link rel="alternate" title="Вастрик.Клуб: JSON Feed"
+    <link rel="alternate" title="Cyber Space: JSON Feed"
           type="application/feed+json"
           href="{{ settings.APP_HOST }}{% url "json_feed" %}" />
     ‍{% endblock %}
@@ -54,7 +54,7 @@
 {% block footer %}
     <footer class="footer" id="footer">
         <div class="footer-left">
-            <a href="{% url "docs" "about" %}">О Клубе</a> &nbsp;&middot;&nbsp;
+            <a href="{% url "docs" "about" %}">О клубе</a> &nbsp;&middot;&nbsp;
 
             <a href="{{ settings.VALUES_GUIDE_URL }}">Наши ценности</a> &nbsp;&middot;&nbsp;
 
@@ -68,9 +68,7 @@
                 <a href="{% url "invites" %}">Пригласить друга</a> &nbsp;&middot;&nbsp;
             {% endif %}
 
-            <a href="https://github.com/vas3k/vas3k.club">Опенсорс</a> &nbsp;&middot;&nbsp;
-
-            <a href="{% url "docs" "blocked_dolor" %}">Оплата из России</a>
+            Основано на <a href="https://github.com/vas3k/vas3k.club">vas3k.club</a> &nbsp;&middot;&nbsp;
 
             <br><br>
 
